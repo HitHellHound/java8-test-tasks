@@ -14,8 +14,11 @@ public class UniversityAnalyzer {
      * @return
      */
     public OptionalInt getMinSubjectMark(Stream<Student> students, int subjectId) {
-        //TODO
-        return null;
+        return students
+                .flatMapToInt(stud -> stud.getSubjectMarks().stream()
+                        .filter(s -> s.getSubjectId() == subjectId)
+                        .mapToInt(m -> m.getMark()))
+                .min();
     }
 
     /**
@@ -26,8 +29,11 @@ public class UniversityAnalyzer {
      * @return
      */
     public OptionalDouble getAverageTeacherMark(Stream<Student> students, int teacherId) {
-        //TODO
-        return null;
+        return students
+                .flatMapToDouble(student -> student.getSubjectMarks().stream()
+                        .filter(mark -> mark.getTeacherId() == teacherId)
+                        .mapToDouble(mark -> mark.getMark()))
+                .average();
     }
 
     /**
