@@ -2,7 +2,11 @@ package com.expertsoft;
 
 import com.expertsoft.model.*;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class UniversityAnalyzer {
@@ -43,8 +47,12 @@ public class UniversityAnalyzer {
      * @return
      */
     public Integer getMinStudentAgeInYears(Stream<Student> students) {
-        //TODO
-        return null;
+        LocalDate today = LocalDate.now();
+        return students
+                .mapToInt(student -> today.getMonth().getValue() <=  student.getBirthday().getMonth().getValue() &&
+                                today.getDayOfMonth() < student.getBirthday().getDayOfMonth() ?
+                                today.getYear() - student.getBirthday().getYear() - 1 : today.getYear() - student.getBirthday().getYear()
+                        ).min().orElse(0);
     }
 
     /**
@@ -55,8 +63,13 @@ public class UniversityAnalyzer {
      * @return
      */
     public Student getStudentWithHighestAverageMark(Stream<Student> students) {
-        //TODO
-        return null;
+        return students
+                .sorted(Comparator.<Student, Double>comparing(student -> student.getSubjectMarks().stream()
+                        .mapToDouble(sm -> sm.getMark())
+                        .average()
+                        .orElse(0)).reversed())
+                .findFirst()
+                .orElse(null);
     }
 
     /**
@@ -67,7 +80,6 @@ public class UniversityAnalyzer {
      * @return
      */
     public List<Student> sortStudentsByCountOfMarks(Stream<Student> students) {
-        //TODO
         return null;
     }
 
