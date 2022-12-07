@@ -2,10 +2,9 @@ package com.expertsoft;
 
 import com.expertsoft.model.*;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -49,10 +48,10 @@ public class UniversityAnalyzer {
     public Integer getMinStudentAgeInYears(Stream<Student> students) {
         LocalDate today = LocalDate.now();
         return students
-                .mapToInt(student -> today.getMonth().getValue() <=  student.getBirthday().getMonth().getValue() &&
-                                today.getDayOfMonth() < student.getBirthday().getDayOfMonth() ?
-                                today.getYear() - student.getBirthday().getYear() - 1 : today.getYear() - student.getBirthday().getYear()
-                        ).min().orElse(0);
+                .mapToInt(student -> today.getMonth().getValue() <= student.getBirthday().getMonth().getValue() &&
+                        today.getDayOfMonth() < student.getBirthday().getDayOfMonth() ?
+                        today.getYear() - student.getBirthday().getYear() - 1 : today.getYear() - student.getBirthday().getYear()
+                ).min().orElse(0);
     }
 
     /**
@@ -80,7 +79,10 @@ public class UniversityAnalyzer {
      * @return
      */
     public List<Student> sortStudentsByCountOfMarks(Stream<Student> students) {
-        return null;
+        return students
+                .sorted(Comparator.<Student, Integer>comparing(student -> student.getSubjectMarks().size()).reversed()
+                        .thenComparing(student -> student.getSurname()))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -90,8 +92,14 @@ public class UniversityAnalyzer {
      * @return
      */
     public List<Integer> getSubjectsByAcademicPerformance(Stream<Student> students) {
-        //TODO
-        return null;
+        return students
+                .flatMap(student -> student.getSubjectMarks().stream())
+                .collect(Collectors.groupingBy(SubjectMark::getSubjectId, Collectors.averagingDouble(SubjectMark::getMark)))
+                .entrySet()
+                .stream()
+                .sorted(Comparator.comparing(Map.Entry::getValue))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -102,8 +110,13 @@ public class UniversityAnalyzer {
      * @return
      */
     public Subject getSubjectThatMostTeachersLead(Stream<Teacher> teachers) {
-        //TODO
-        return null;
+        return teachers.flatMap(teacher -> teacher.getTaughtSubjects().stream())
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .entrySet()
+                .stream()
+                .max(Comparator.comparing(entry -> entry.getValue()))
+                .map(entry -> entry.getKey())
+                .orElse(null);
     }
 
     /**
@@ -115,7 +128,6 @@ public class UniversityAnalyzer {
      * @return
      */
     public List<Student> getGraduatedExcellentStudents(Stream<Student> students) {
-        //TODO
         return null;
     }
 
