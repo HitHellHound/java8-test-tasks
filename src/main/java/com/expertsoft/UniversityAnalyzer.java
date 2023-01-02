@@ -63,11 +63,10 @@ public class UniversityAnalyzer {
      */
     public Student getStudentWithHighestAverageMark(Stream<Student> students) {
         return students
-                .sorted(Comparator.<Student, Double>comparing(student -> student.getSubjectMarks().stream()
+                .max(Comparator.<Student, Double>comparing(student -> student.getSubjectMarks().stream()
                         .mapToDouble(sm -> sm.getMark())
                         .average()
-                        .orElse(0)).reversed())
-                .findFirst()
+                        .orElse(0)))
                 .orElse(null);
     }
 
@@ -128,7 +127,17 @@ public class UniversityAnalyzer {
      * @return
      */
     public List<Student> getGraduatedExcellentStudents(Stream<Student> students) {
-        return null;
+        LocalDate today = LocalDate.now();
+        return students.filter(student -> (today.getMonth().getValue() <= student.getBirthday().getMonth().getValue() &&
+                        today.getDayOfMonth() < student.getBirthday().getDayOfMonth() ?
+                        today.getYear() - student.getBirthday().getYear() - 1 :
+                        today.getYear() - student.getBirthday().getYear()) >= 21)
+                .filter(student -> student.getSubjectMarks().stream()
+                        .mapToInt(subjectMark -> subjectMark.getMark())
+                        .average()
+                        .orElse(0) >= 8)
+                .sorted(Comparator.comparing(Student::getSurname))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -139,8 +148,16 @@ public class UniversityAnalyzer {
      * @return
      */
     public Teacher getHeadOfTheMostSuccessfulDepartment(Stream<Department> departments) {
-        //TODO
-        return null;
+        return departments.sorted(Comparator.<Department, Double>comparing(department -> department.getStudents().stream()
+                        .mapToDouble(student -> student.getSubjectMarks().stream()
+                                .mapToInt(SubjectMark::getMark)
+                                .average()
+                                .orElse(0))
+                        .average()
+                        .orElse(0)).reversed())
+                .findFirst()
+                .map(department -> department.getHead())
+                .orElse(null);
     }
 
     /**
@@ -150,7 +167,8 @@ public class UniversityAnalyzer {
      * @return
      */
     public List<Subject> getSubjectsThatHeadTeachesInHisDepartment(Department department) {
-        //TODO
-        return null;
+        return department.getHead().getTaughtSubjects().stream()
+                .filter(subject -> department.getSubjects().contains(subject))
+                .collect(Collectors.toList());
     }
 }
